@@ -34,16 +34,16 @@ import java.awt.event.MouseListener;
 public class CPainting extends Canvas implements MouseListener {
     private static final long serialVersionUID = 1L;
     // matrice servant pour le produit de convolution
-    private static float[][] mMatriceConv9 = {{1 / 16f, 2 / 16f, 1 / 16f}, {2 / 16f, 4 / 16f, 2 / 16f}, {1 / 16f, 2 / 16f, 1 / 16f}};
-    private static float[][] mMatriceConv25 = {{1 / 44f, 1 / 44f, 2 / 44f, 1 / 44f, 1 / 44f}, {1 / 44f, 2 / 44f, 3 / 44f, 2 / 44f, 1 / 44f}, {2 / 44f, 3 / 44f, 4 / 44f, 3 / 44f, 2 / 44f}, {1 / 44f, 2 / 44f, 3 / 44f, 2 / 44f, 1 / 44f}, {1 / 44f, 1 / 44f, 2 / 44f, 1 / 44f, 1 / 44f}};
+    private static int[][] mMatriceConv9 = {{1 , 2, 1}, {2, 4, 2}, {1, 2, 1}};
+    private static float[][] mMatriceConv25 = {{1, 1, 2, 1, 1}, {1, 2, 3, 2, 1}, {2, 3, 4, 3, 2}, {1, 2, 3, 2, 1}, {1, 1, 2, 1, 1}};
     private static float[][] mMatriceConv49 =
-            {{1 / 128f,1 / 128f,2 / 128f,2 / 128f,2 / 128f,1 / 128f,1 / 128f},
-            {1 / 128f,2 / 128f,3 / 128f,4 / 128f,3 / 128f,2 / 128f,1 / 128f},
-            {2 / 128f,3 / 128f,4 / 128f,5 / 128f,4 / 128f,3 / 128f,2 / 128f},
-            {2 / 128f,4 / 128f,5 / 128f,8 / 128f,5 / 128f,4 / 128f,2 / 128f},
-            {2 / 128f,3 / 128f,4 / 128f,5 / 128f,4 / 128f,3 / 128f,2 / 128f},
-            {1 / 128f,2 / 128f,3 / 128f,4 / 128f,3 / 128f,2 / 128f,1 / 128f},
-            {1 / 128f,1 / 128f,2 / 128f,2 / 128f,2 / 128f,1 / 128f,1 / 128f}};
+            {{1 ,1 ,2 ,2 ,2 ,1 ,1 },
+            {1 ,2 ,3 ,4 ,3 ,2 ,1 },
+            {2 ,3 ,4 ,5 ,4 ,3 ,2 },
+            {2 ,4 ,5 ,8 ,5 ,4 ,2 },
+            {2 ,3 ,4 ,5 ,4 ,3 ,2 },
+            {1 ,2 ,3 ,4 ,3 ,2 ,1 },
+            {1 ,1 ,2 ,2 ,2 ,1 ,1 }};
     // Objet de type Graphics permettant de manipuler l'affichage du Canvas
     private Graphics mGraphics;
     // Objet ne servant que pour les bloc synchronized pour la manipulation du
@@ -256,7 +256,6 @@ public class CPainting extends Canvas implements MouseListener {
         float R, G, B;
         Color lColor;
 
-
         for (i = 0; i < dimension; i++) {
             for (j = 0; j < dimension; j++) {
                 R = G = B = 0f;
@@ -266,17 +265,17 @@ public class CPainting extends Canvas implements MouseListener {
                         m = (x + i + k - (dimension - 1) + mDimension.width) % mDimension.width;
                         n = (y + j + l - (dimension - 1) + mDimension.height) % mDimension.height;
                         if(dimension == 3){
-                            R += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getRed();
-                            G += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getGreen();
-                            B += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getBlue();
+                            R += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getRed() / 16f;
+                            G += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getGreen() / 16f;
+                            B += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getBlue() / 16f;
                         }else if(dimension == 5){
-                            R += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getRed();
-                            G += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getGreen();
-                            B += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getBlue();
+                            R += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getRed() / 44f;
+                            G += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getGreen() / 44f;
+                            B += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getBlue() / 44f;
                         }else{
-                            R += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getRed();
-                            G += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getGreen();
-                            B += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getBlue();
+                            R += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getRed() / 128f;
+                            G += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getGreen() / 128f;
+                            B += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getBlue() / 128f;
                         }
 
                     }
@@ -293,6 +292,8 @@ public class CPainting extends Canvas implements MouseListener {
                 }
             }
         }
+
+
     }
 
 }
