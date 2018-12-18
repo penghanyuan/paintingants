@@ -35,8 +35,8 @@ public class CPainting extends Canvas implements MouseListener {
     private static final long serialVersionUID = 1L;
     // matrice servant pour le produit de convolution
     private static int[][] mMatriceConv9 = {{1 , 2, 1}, {2, 4, 2}, {1, 2, 1}};
-    private static float[][] mMatriceConv25 = {{1, 1, 2, 1, 1}, {1, 2, 3, 2, 1}, {2, 3, 4, 3, 2}, {1, 2, 3, 2, 1}, {1, 1, 2, 1, 1}};
-    private static float[][] mMatriceConv49 =
+    private static int[][] mMatriceConv25 = {{1, 1, 2, 1, 1}, {1, 2, 3, 2, 1}, {2, 3, 4, 3, 2}, {1, 2, 3, 2, 1}, {1, 1, 2, 1, 1}};
+    private static int[][] mMatriceConv49 =
             {{1 ,1 ,2 ,2 ,2 ,1 ,1 },
             {1 ,2 ,3 ,4 ,3 ,2 ,1 },
             {2 ,3 ,4 ,5 ,4 ,3 ,2 },
@@ -56,7 +56,7 @@ public class CPainting extends Canvas implements MouseListener {
     // couleur du fond
     private Color mCouleurFond = new Color(255, 255, 255);
     // dimensions
-    private Dimension mDimension = new Dimension();
+    private Dimension mDimension;
 
     private PaintingAnts mApplis;
 
@@ -253,34 +253,51 @@ public class CPainting extends Canvas implements MouseListener {
     private void convolution(int x, int y, int dimension) {
         // produit de convolution discrete sur 9 cases
         int i, j, k, l, m, n;
-        float R, G, B;
+        int R, G, B;
         Color lColor;
 
         for (i = 0; i < dimension; i++) {
             for (j = 0; j < dimension; j++) {
-                R = G = B = 0f;
+                R = G = B = 0;
 
                 for (k = 0; k < dimension; k++) {
                     for (l = 0; l < dimension; l++) {
                         m = (x + i + k - (dimension - 1) + mDimension.width) % mDimension.width;
                         n = (y + j + l - (dimension - 1) + mDimension.height) % mDimension.height;
                         if(dimension == 3){
-                            R += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getRed() / 16f;
-                            G += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getGreen() / 16f;
-                            B += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getBlue() / 16f;
+                            R += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getRed();
+                            G += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getGreen();
+                            B += CPainting.mMatriceConv9[k][l] * mCouleurs[m][n].getBlue();
                         }else if(dimension == 5){
-                            R += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getRed() / 44f;
-                            G += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getGreen() / 44f;
-                            B += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getBlue() / 44f;
+                            R += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getRed();
+                            G += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getGreen();
+                            B += CPainting.mMatriceConv25[k][l] * mCouleurs[m][n].getBlue();
                         }else{
-                            R += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getRed() / 128f;
-                            G += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getGreen() / 128f;
-                            B += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getBlue() / 128f;
+                            R += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getRed();
+                            G += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getGreen();
+                            B += CPainting.mMatriceConv49[k][l] * mCouleurs[m][n].getBlue();
                         }
 
                     }
                 }
-                lColor = new Color((int) R, (int) G, (int) B);
+                switch (dimension){
+                    case 3:
+                        R = R / 16;
+                        G = G / 16;
+                        B = B / 16;
+                        break;
+                    case 5:
+                        R = R / 44;
+                        G = G / 44;
+                        B = B / 44;
+                        break;
+                    case 7:
+                        R = R / 128;
+                        G = G / 128;
+                        B = B / 128;
+                        break;
+                }
+                lColor = new Color( R, G, B);
 
                 mGraphics.setColor(lColor);
 
