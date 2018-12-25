@@ -11,6 +11,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferStrategy;
 
 /**
  * <p>
@@ -60,6 +61,8 @@ public class CPainting extends Canvas implements MouseListener {
 
     private PaintingAnts mApplis;
 
+    private BufferStrategy bs;
+
     private boolean mSuspendu = false;
 
     /******************************************************************************
@@ -68,6 +71,7 @@ public class CPainting extends Canvas implements MouseListener {
     public CPainting(Dimension pDimension, PaintingAnts pApplis) {
         int i, j;
         addMouseListener(this);
+
 
         mApplis = pApplis;
 
@@ -93,9 +97,9 @@ public class CPainting extends Canvas implements MouseListener {
      * d'une case
      ******************************************************************************/
     public Color getCouleur(int x, int y) {
-        synchronized (mMutexCouleurs) {
-            return mCouleurs[x * mDimension.width + y];
-        }
+
+        return mCouleurs[x * mDimension.width + y];
+
     }
 
     /******************************************************************************
@@ -128,20 +132,17 @@ public class CPainting extends Canvas implements MouseListener {
      ******************************************************************************/
     public void init() {
         int i, j;
-        mGraphics = getGraphics();
-        synchronized (mMutexCouleurs) {
-            mGraphics.clearRect(0, 0, mDimension.width, mDimension.height);
 
-            // initialisation de la matrice des couleurs
 
-            for (i = 0; i != mDimension.width; i++) {
-                for (j = 0; j != mDimension.height; j++) {
-                    mCouleurs[i * mDimension.width + j] = new Color(mCouleurFond.getRed(), mCouleurFond.getGreen(), mCouleurFond.getBlue());
-                }
+        for (i = 0; i != mDimension.width; i++) {
+            for (j = 0; j != mDimension.height; j++) {
+                mCouleurs[i * mDimension.width + j] = new Color(mCouleurFond.getRed(), mCouleurFond.getGreen(), mCouleurFond.getBlue());
             }
         }
 
+
         mSuspendu = false;
+
     }
 
     /****************************************************************************/
@@ -192,14 +193,13 @@ public class CPainting extends Canvas implements MouseListener {
     public void paint(Graphics pGraphics) {
         int i, j;
 
-        synchronized (mMutexCouleurs) {
-            for (i = 0; i < mDimension.width; i++) {
-                for (j = 0; j < mDimension.height; j++) {
-                    pGraphics.setColor(mCouleurs[i * mDimension.width + j]);
-                    pGraphics.fillRect(i, j, 1, 1);
-                }
+        for (i = 0; i < mDimension.width; i++) {
+            for (j = 0; j < mDimension.height; j++) {
+                pGraphics.setColor(mCouleurs[i * mDimension.width + j]);
+                pGraphics.fillRect(i, j, 1, 1);
             }
         }
+
     }
 
     /******************************************************************************
@@ -208,35 +208,42 @@ public class CPainting extends Canvas implements MouseListener {
      * couleurs
      ******************************************************************************/
     public void setCouleur(int x, int y, Color c, int pTaille) {
-
-        synchronized (mMutexCouleurs) {
-            if (!mSuspendu) {
-                // on colorie la case sur laquelle se trouve la fourmi
-                mGraphics.setColor(c);
-                mGraphics.fillRect(x, y, 1, 1);
-            }
-
-            mCouleurs[x * mDimension.width + y] = c;
-
-            // on fait diffuser la couleur :
-            switch (pTaille) {
-                case 0:
-                    // on ne fait rien = pas de diffusion
-                    break;
-                case 1:
-                    // produit de convolution discrete sur 9 cases
-                    convolution(x, y, 3);
-                    break;
-                case 2:
-                    // produit de convolution discrete sur 25 cases
-                    convolution(x, y, 5);
-                    break;
-                case 3:
-                    // produit de convolution discrete sur 49 cases
-                    convolution(x, y, 7);
-                    break;
-            }// end switch
+        bs = getBufferStrategy();
+        if(bs == null) { //True if our canvas has no buffer strategy (should only happen once when we first start the game)
+            createBufferStrategy(1); //Create a buffer strategy using two buffers (double buffer the canvas)
+            return ;
         }
+
+        mGraphics = bs.getDrawGraphics();
+
+
+        if (!mSuspendu) {
+            // on colorie la case sur laquelle se trouve la fourmi
+            mGraphics.setColor(c);
+            mGraphics.fillRect(x, y, 1, 1);
+        }
+
+        mCouleurs[x * mDimension.width + y] = c;
+
+        // on fait diffuser la couleur :
+        switch (pTaille) {
+            case 0:
+                // on ne fait rien = pas de diffusion
+                break;
+            case 1:
+                // produit de convolution discrete sur 9 cases
+                convolution(x, y, 3);
+                break;
+            case 2:
+                // produit de convolution discrete sur 25 cases
+                convolution(x, y, 5);
+                break;
+            case 3:
+                // produit de convolution discrete sur 49 cases
+                convolution(x, y, 7);
+                break;
+        }// end switch
+
     }
 
     /******************************************************************************
@@ -306,10 +313,11 @@ public class CPainting extends Canvas implements MouseListener {
                 mCouleurs[m * mDimension.width + n] = lColor;
                 if (!mSuspendu) {
                     mGraphics.fillRect(m, n, 1, 1);
+                    mGraphics.dispose(); //Dispose of our graphics object because it is no longer needed, and unnecessarily taking up memory
+                    bs.show(); //Show the buffer strategy, flip it if necessary (make back buffer the visible buffer and vice versa)
                 }
             }
         }
-
 
     }
 

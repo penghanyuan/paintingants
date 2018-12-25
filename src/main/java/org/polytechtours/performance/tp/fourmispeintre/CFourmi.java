@@ -161,6 +161,8 @@ public class CFourmi {
         y = modulo(y, mPainting.getHauteur());
 
         // coloration de la nouvelle position de la fourmi
+
+        // multi thread
         mPainting.setCouleur(x, y, mCouleurDeposee, mTaille);
 
         mApplis.IncrementFpsCounter();
