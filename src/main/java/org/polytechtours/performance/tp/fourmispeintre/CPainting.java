@@ -262,6 +262,13 @@ public class CPainting extends Canvas implements MouseListener {
         int i, j, k, l, m, n;
         int R, G, B;
         Color lColor;
+        bs = getBufferStrategy();
+        if(bs == null) { //True if our canvas has no buffer strategy (should only happen once when we first start the game)
+            createBufferStrategy(1); //Create a buffer strategy using two buffers (double buffer the canvas)
+            return ;
+        }
+
+        mGraphics = bs.getDrawGraphics();
 
         for (i = 0; i < dimension; i++) {
             for (j = 0; j < dimension; j++) {
